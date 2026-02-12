@@ -12,7 +12,12 @@ class ImageDisplay(QtWidgets.QLabel):
         self._zoom_factor = 1.0
         self._offset = QtCore.QPointF(0, 0)
         self._last_mouse_pos = None
-        self._free_mode = False  # ТА САМАЯ ПЕРЕМЕННАЯ, КОТОРОЙ НЕ ХВАТАЛО
+        self._free_mode = False 
+        self._show_overlay = True
+
+    def set_overlay_visible(self, visible):
+        self._show_overlay = visible
+        self.update()
 
     def set_image(self, pixmap):
         self._original_pixmap = pixmap
@@ -76,7 +81,8 @@ class ImageDisplay(QtWidgets.QLabel):
 
         painter.drawPixmap(dest_rect.toRect(), self._original_pixmap)
 
-        if self._current_ratio:
+        # Рисуем рамку ТОЛЬКО если флаг True и выбрано соотношение
+        if self._show_overlay and self._current_ratio:
             self._draw_fixed_crop_overlay(painter)
         
         painter.end()
@@ -172,6 +178,5 @@ class ImageDisplay(QtWidgets.QLabel):
         # Сбрасываем параметры отображения, так как картинка уже обрезана
         self._offset = QtCore.QPointF(0, 0)
         self._zoom_factor = 1.0
-        # self._current_ratio = None # Можно оставить или сбросить
         
         self.set_image(pixmap)
