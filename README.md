@@ -94,15 +94,17 @@ python main.py
 
 ## Project Structure
 
-
+```
 image2pixel/
-├── main.py              # Application entry point and logic
-├── gui.py               # GUI layout and widgets
-├── display_image.py     # Custom image display widget
-├── edit_image.py        # Crop transformation logic
-├── pixel_transform.py   # Pixelation effect implementation
-├── requirements.txt     # Python dependencies
-└── README.md           # This file
+│
+├── main.py            # Application entry point and logic
+├── gui.py             # GUI layout and widgets
+├── display_image.py   # Custom image display widget
+├── edit_image.py      # Crop transformation logic
+├── pixel_transform.py # Pixelation effect implementation
+├── requirements.txt   # Python dependencies
+└── README.md          # Project documentation
+```
 
 
 ## Technical Details
