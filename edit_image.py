@@ -1,49 +1,127 @@
-from PIL import Image
+"""
+Image Cropping Module - Handles crop transformations
+"""
 
-def process_crop(image_path, ratio, zoom, offset, view_size):
+from PIL import Image
+from typing import Tuple
+
+
+def process_crop(
+    image_path: str, 
+    ratio: float, 
+    zoom: float, 
+    offset, 
+    view_size
+) -> Image.Image:
     """
-    image_path: путь к файлу
-    ratio: целевое соотношение (например, 1.0 или 1.77)
-    zoom: фактор масштаба (1.0, 1.5 и т.д.)
-    offset: смещение QPointF(x, y) из GUI
-    view_size: размер виджета QLabel (QSize), чтобы рассчитать пропорции
+    Crop an image based on aspect ratio, zoom, and offset parameters
+    
+    This function translates GUI coordinates (view_size, zoom, offset) into
+    actual pixel coordinates for cropping the original image.
+    
+    Args:
+        image_path (str): Path to the source image file
+        ratio (float): Target aspect ratio (width/height)
+        zoom (float): Zoom factor (1.0 = 100%, 1.5 = 150%, etc.)
+        offset (QPointF): Pan offset from center in GUI coordinates
+        view_size (QSize): Size of the display widget
+        
+    Returns:
+        PIL.Image: Cropped image
+        
+    Raises:
+        FileNotFoundError: If image file doesn't exist
+        ValueError: If image cannot be opened or parameters are invalid
     """
+    # Validate inputs
+    if ratio <= 0:
+        raise ValueError(f"Invalid aspect ratio: {ratio}")
+    if zoom <= 0:
+        raise ValueError(f"Invalid zoom factor: {zoom}")
+    
     with Image.open(image_path) as img:
         img_w, img_h = img.size
         
-        # 1. Считаем масштаб отображения (как Qt вписал картинку в окно)
-        # Мы использовали KeepAspectRatio. Находим коэффициент "экран / оригинал"
-        scale_fit = min((view_size.width() - 40) / img_w, (view_size.height() - 40) / img_h)
+        # Validate image dimensions
+        if img_w <= 0 or img_h <= 0:
+            raise ValueError(f"Invalid image dimensions: {img_w}x{img_h}")
         
-        # Общий масштаб (вписывание + пользовательский зум)
+        # Calculate display scale factor
+        # This is how Qt fits the image into the widget (KeepAspectRatio)
+        padding = 40
+        scale_fit = min(
+            (view_size.width() - padding) / img_w, 
+            (view_size.height() - padding) / img_h
+        )
+        
+        # Total scale includes both fit-to-window and user zoom
         total_scale = scale_fit * zoom
         
-        # 2. Определяем размер рамки обрезки на экране
-        vw, vh = view_rect_w = view_size.width() - 40, view_size.height() - 40
+        if total_scale <= 0:
+            raise ValueError(f"Invalid total scale: {total_scale}")
+        
+        # Calculate crop frame size in GUI coordinates
+        vw = view_size.width() - padding
+        vh = view_size.height() - padding
+        
         if vw / vh > ratio:
-            cw, ch = vh * ratio, vh
+            cw = vh * ratio
+            ch = vh
         else:
-            cw, ch = vw, vw / ratio
+            cw = vw
+            ch = vw / ratio
             
-        # 3. Пересчитываем размеры рамки в пиксели оригинала
+        # Convert crop dimensions to original image pixels
         crop_w_orig = cw / total_scale
         crop_h_orig = ch / total_scale
         
-        # 4. Находим центр обрезки относительно центра изображения
-        # Смещение в GUI (offset) нужно инвертировать и масштабировать
+        # Calculate crop center in original image coordinates
+        # Offset is inverted because GUI moves image, not crop frame
         offset_x_orig = offset.x() / total_scale
         offset_y_orig = offset.y() / total_scale
         
         center_x = img_w / 2 - offset_x_orig
         center_y = img_h / 2 - offset_y_orig
         
-        # 5. Вычисляем координаты углов (Left, Top, Right, Bottom)
+        # Calculate crop box coordinates (left, top, right, bottom)
         left = center_x - crop_w_orig / 2
         top = center_y - crop_h_orig / 2
         right = center_x + crop_w_orig / 2
         bottom = center_y + crop_h_orig / 2
         
-        # Обрезаем
+        # Clamp to image boundaries to avoid errors
+        left = max(0, left)
+        top = max(0, top)
+        right = min(img_w, right)
+        bottom = min(img_h, bottom)
+        
+        # Validate crop box
+        if right <= left or bottom <= top:
+            raise ValueError(
+                f"Invalid crop box: ({left}, {top}, {right}, {bottom})"
+            )
+        
+        # Perform crop
         cropped_img = img.crop((left, top, right, bottom))
         
         return cropped_img
+
+
+def validate_image_file(file_path: str) -> Tuple[bool, str]:
+    """
+    Validate if a file is a valid image
+    
+    Args:
+        file_path (str): Path to file to validate
+        
+    Returns:
+        Tuple[bool, str]: (is_valid, error_message)
+    """
+    try:
+        with Image.open(file_path) as img:
+            img.verify()
+        return True, ""
+    except FileNotFoundError:
+        return False, "File not found"
+    except Exception as e:
+        return False, f"Invalid image file: {str(e)}"
