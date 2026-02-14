@@ -40,7 +40,7 @@ A powerful and user-friendly desktop application for cropping and pixelating ima
 
 1. Clone the repository:
 
-git clone https://github.com/yourusername/image2pixel.git
+git clone https://github.com/VadymDem/image2pixel.git
 cd image2pixel
 
 
