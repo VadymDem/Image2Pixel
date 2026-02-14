@@ -4,18 +4,17 @@
 Image2Pixel is organized into modular Python files, each with a specific responsibility.
 
 
+```
 image2pixel/
-├── main.py                 # Application entry point and main logic
-├── gui.py                  # GUI layout and widgets
-├── display_image.py        # Custom image display widget
-├── edit_image.py           # Crop transformation logic
-├── pixel_transform.py      # Pixelation effect implementation
-├── requirements.txt        # Python dependencies
-├── setup.py               # Package distribution setup
-├── LICENSE                # MIT License
-├── README.md              # Main documentation
-├── USAGE_EXAMPLES.md      # Detailed usage examples
-
+│
+├── main.py            # Application entry point and logic
+├── gui.py             # GUI layout and widgets
+├── display_image.py   # Custom image display widget
+├── edit_image.py      # Crop transformation logic
+├── pixel_transform.py # Pixelation effect implementation
+├── requirements.txt   # Python dependencies
+└── README.md          # Project documentation
+```
 
 ## File Descriptions
 
@@ -394,4 +393,5 @@ This structure provides:
 - ✅ Maintainability  
 - ✅ Extensibility
 - ✅ Clear separation of concerns
+
 - ✅ Comprehensive documentation
