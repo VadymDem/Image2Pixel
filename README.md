@@ -135,7 +135,6 @@ image2pixel/
 - Check file permissions
 
 **Pixelation not working:**
-- Make sure you've applied crop first
 - Try adjusting the slider value
 - Check that the image is loaded
 
